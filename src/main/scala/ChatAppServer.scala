@@ -1,5 +1,8 @@
 package com.github.hemirime.chatapp
 
+import chat.ChatService
+import chat.api.ChatApi
+import chat.storage.InMemoryChatStorage
 import user.UserService
 import user.api.UserApi
 import user.storage.InMemoryUserStorage
@@ -28,10 +31,12 @@ object ChatAppServer extends JsonErrorHandling {
     import system.executionContext
 
     val userApi = new UserApi(new UserService(new InMemoryUserStorage)).routes
+    val chatApi = new ChatApi(new ChatService(new InMemoryChatStorage)).routes
 
     val routes = Route.seal(
       concat(
         pathPrefix("users")(userApi),
+        pathPrefix("chats")(chatApi),
       )
     )
 
