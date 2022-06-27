@@ -1,7 +1,7 @@
 package com.github.hemirime.chatapp
 package chat.api
 
-import chat.Chat
+import chat.{Chat, Message}
 import user.User
 
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
@@ -15,11 +15,17 @@ final case class ChatCreateRequest(name: String, users: Seq[User.ID]) {
   require(users.nonEmpty, "users list can't be empty")
 }
 
+final case class SendMessageRequest(author: User.ID, text: String) {
+  require(text.nonEmpty, "text can't be empty")
+}
+
 private[api] trait EntityMarshalling extends PlayJsonSupport {
   implicit val chatCreateReads: Reads[ChatCreateRequest] = (
     (__ \ "name").read[String] and
       (__ \ "users").read[Seq[UUID]]
     ) (ChatCreateRequest.apply _)
+  implicit val sendMessageReads: Reads[SendMessageRequest] = Json.reads[SendMessageRequest]
 
   implicit val chatWrites: OWrites[Chat] = Json.writes[Chat]
+  implicit val messageWrites: OWrites[Message] = Json.writes[Message]
 }
