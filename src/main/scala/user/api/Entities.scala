@@ -11,6 +11,6 @@ final case class UserCreateRequest(username: String) {
 }
 
 private[api] trait EntityMarshalling extends PlayJsonSupport {
-  implicit val userCreate: Reads[UserCreateRequest] = (__ \ "username").read[String].map(UserCreateRequest)
-  implicit val user: OWrites[User] = Json.writes[User]
+  implicit val createUserReads: Reads[UserCreateRequest] = (__ \ "username").read[String].map(UserCreateRequest)
+  implicit val userWrites: OWrites[User] = Json.writes[User]
 }

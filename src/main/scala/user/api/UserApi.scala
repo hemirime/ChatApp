@@ -4,7 +4,7 @@ package user.api
 import Response._
 import user.UserService
 
-import akka.http.scaladsl.model.StatusCodes.{BadRequest, Created, OK}
+import akka.http.scaladsl.model.StatusCodes.{Created, OK}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 
@@ -13,20 +13,24 @@ class UserApi(userService: UserService)
 
   lazy val routes: Route = concat(
     getAll,
+    getUser,
     createUser
   )
 
-  def getAll: Route = get {
+  def getAll: Route = (get & pathEnd) {
     onSuccess(userService.getAll) { users =>
       complete(OK, ok(users))
     }
   }
 
+  def getUser: Route = (get & path(JavaUUID)) { userId =>
+    onSuccess(userService.get(userId))(completeWithStatus(OK, _))
+  }
+
   def createUser: Route = post {
     entity(as[UserCreateRequest]) { request =>
-      onSuccess(userService.create(request.username)) {
-        case Some(user) => complete(Created, ok(user.id))
-        case None => complete(BadRequest, err("username already taken"))
+      onSuccess(userService.create(request.username)) { user =>
+        completeWithStatus(Created, user.map(_.id))
       }
     }
   }

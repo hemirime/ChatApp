@@ -18,13 +18,13 @@ class InMemoryUserStorage extends UserStorage {
   override def getAll: Future[Seq[User]] =
     Future.successful(users)
 
-  override def save(user: User): Future[Option[User]] =
-    Future.successful {
-      if (users.exists(_.username == user.username)) {
-        None
-      } else {
+  override def save(user: User): Future[User] =
+    if (users.exists(_.username == user.username)) {
+      Future.failed(new IllegalArgumentException(user.username))
+    } else {
+      Future.successful {
         users = user +: users
-        Some(user)
+        user
       }
     }
 }

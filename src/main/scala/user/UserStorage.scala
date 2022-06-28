@@ -11,5 +11,5 @@ trait UserStorage {
 
   def getAll: Future[Seq[User]]
 
-  def save(user: User): Future[Option[User]]
+  def save(user: User): Future[User]
 }
