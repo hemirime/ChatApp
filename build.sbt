@@ -8,6 +8,8 @@ lazy val root = (project in file("."))
     idePackagePrefix := Some("com.github.hemirime.chatapp")
   )
 
+scalacOptions += "-Wconf:cat=other-match-analysis:error"
+
 libraryDependencies ++= {
   val AkkaVersion = "2.6.19"
   val AkkaHttpVersion = "10.2.9"
