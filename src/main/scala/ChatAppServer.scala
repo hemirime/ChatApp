@@ -30,8 +30,9 @@ object ChatAppServer extends JsonErrorHandling {
     implicit val system: ActorSystem[Nothing] = context.system
     import system.executionContext
 
-    val userApi = new UserApi(new UserService(new InMemoryUserStorage)).routes
-    val chatApi = new ChatApi(new ChatService(new InMemoryChatStorage, new InMemoryMessageStorage)).routes
+    val userStorage = new InMemoryUserStorage
+    val userApi = new UserApi(new UserService(userStorage)).routes
+    val chatApi = new ChatApi(new ChatService(new InMemoryChatStorage, new InMemoryMessageStorage, userStorage)).routes
 
     val routes = Route.seal(
       concat(

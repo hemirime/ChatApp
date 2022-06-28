@@ -22,13 +22,13 @@ class InMemoryChatStorage extends ChatStorage {
   override def getAll(userId: User.ID): Future[Seq[Chat]] =
     Future.successful(chats.filter(_.users contains userId))
 
-  override def save(chat: Chat): Future[Option[Chat]] =
-    Future.successful {
-      if (chats.exists(_.name == chat.name)) {
-        None
-      } else {
+  override def save(chat: Chat): Future[Chat] =
+    if (chats.exists(_.name == chat.name)) {
+      Future.failed(new IllegalArgumentException(chat.name))
+    } else {
+      Future.successful {
         chats = chat +: chats
-        Some(chat)
+        chat
       }
     }
 }

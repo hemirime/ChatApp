@@ -15,5 +15,5 @@ trait ChatStorage {
 
   def getAll(userId: User.ID): Future[Seq[Chat]]
 
-  def save(chat: Chat): Future[Option[Chat]]
+  def save(chat: Chat): Future[Chat]
 }
