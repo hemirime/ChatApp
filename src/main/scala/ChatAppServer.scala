@@ -5,7 +5,7 @@ import chat.api.ChatApi
 import chat.storage.{InMemoryChatStorage, InMemoryMessageStorage}
 import user.UserService
 import user.api.UserApi
-import user.storage.InMemoryUserStorage
+import user.storage.DatabaseUserStorage
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorSystem, Behavior}
@@ -13,7 +13,10 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.{concat, pathPrefix}
 import akka.http.scaladsl.server.Route
 import com.typesafe.config.ConfigFactory
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
+import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
@@ -30,7 +33,11 @@ object ChatAppServer extends JsonErrorHandling {
     implicit val system: ActorSystem[Nothing] = context.system
     import system.executionContext
 
-    val userStorage = new InMemoryUserStorage
+    val dc = DatabaseConfig.forConfig[JdbcProfile]("database")
+
+    val userStorage = new DatabaseUserStorage(dc.profile, dc.db)
+    Await.ready(userStorage.createSchema, 3.seconds)
+
     val userApi = new UserApi(new UserService(userStorage)).routes
     val chatApi = new ChatApi(new ChatService(new InMemoryChatStorage, new InMemoryMessageStorage, userStorage)).routes
 

@@ -13,6 +13,7 @@ scalacOptions += "-Wconf:cat=other-match-analysis:error"
 libraryDependencies ++= {
   val AkkaVersion = "2.6.19"
   val AkkaHttpVersion = "10.2.9"
+  val SlickVersion = "3.3.3"
 
   Seq(
     "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
@@ -22,6 +23,8 @@ libraryDependencies ++= {
     "com.typesafe.play" %% "play-json" % "2.9.2",
     "de.heikoseeberger" %% "akka-http-play-json" % "1.39.2",
   ) ++ Seq(
-    "ch.qos.logback" % "logback-classic" % "1.2.11",
-  )
+    "com.typesafe.slick" %% "slick" % SlickVersion,
+    "com.typesafe.slick" %% "slick-hikaricp" % SlickVersion,
+    "org.postgresql" % "postgresql" % "42.3.6",
+  ) :+ "ch.qos.logback" % "logback-classic" % "1.2.11"
 }
