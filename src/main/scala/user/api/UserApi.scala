@@ -24,13 +24,13 @@ class UserApi(userService: UserService)
   }
 
   def getUser: Route = (get & path(JavaUUID)) { userId =>
-    onSuccess(userService.get(userId))(completeWithStatus(OK, _))
+    onSuccess(userService.get(userId))(completeWithOption(OK, _))
   }
 
   def createUser: Route = post {
     entity(as[UserCreateRequest]) { request =>
       onSuccess(userService.create(request.username)) { user =>
-        completeWithStatus(Created, user.map(_.id))
+        completeWithEither(Created, user.map(_.id))
       }
     }
   }

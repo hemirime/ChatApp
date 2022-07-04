@@ -20,7 +20,7 @@ class InMemoryChatStorage extends ChatStorage {
     Future.successful(chats)
 
   override def getAll(userId: User.ID): Future[Seq[Chat]] =
-    Future.successful(chats.filter(_.users contains userId))
+    Future.successful(chats.filter(_.users exists (_.id == userId)))
 
   override def save(chat: Chat): Future[Chat] =
     if (chats.exists(_.name == chat.name)) {

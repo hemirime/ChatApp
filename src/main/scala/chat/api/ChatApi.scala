@@ -20,34 +20,43 @@ class ChatApi(chatService: ChatService)
         createChat,
       )
     },
-    path(JavaUUID / "messages") { chatId =>
+    pathPrefix(JavaUUID) { chatId =>
       concat(
-        getMessages(chatId),
-        sendMessage(chatId)
+        getChat(chatId),
+        path("messages") {
+          concat(
+            getMessages(chatId),
+            sendMessage(chatId),
+          )
+        },
       )
     }
   )
 
   def getChats: Route = (get & parameter("user".as[UUID].?)) {
-    case Some(userId) => onSuccess(chatService.getChats(userId))(completeWithStatus(OK, _))
+    case Some(userId) => onSuccess(chatService.getChats(userId))(completeWithOption(OK, _))
     case _ => onSuccess(chatService.getAllChats)(completeWithStatus(OK, _))
   }
 
-  def createChat: Route = post {
+  def getChat(chatId: Chat.ID): Route = (pathEnd & get) {
+    onSuccess(chatService.getChat(chatId))(completeWithOption(OK, _))
+  }
+
+  def createChat: Route = (pathEnd & post) {
     entity(as[ChatCreateRequest]) { request =>
       onSuccess(chatService.createChat(request.name, request.users)) { chat =>
-        completeWithStatus(Created, chat.map(_.id))
+        completeWithEither(Created, chat.map(_.id))
       }
     }
   }
 
   def getMessages(chatId: Chat.ID): Route = get {
-    onSuccess(chatService.getMessages(chatId))(completeWithStatus(OK, _))
+    onSuccess(chatService.getMessages(chatId))(completeWithOption(OK, _))
   }
 
   def sendMessage(chatId: Chat.ID): Route = post {
     entity(as[SendMessageRequest]) { request =>
-      onSuccess(chatService.sendMessage(chatId, request.author, request.text))(completeWithStatus(OK, _))
+      onSuccess(chatService.sendMessage(chatId, request.author, request.text))(completeWithOption(OK, _))
     }
   }
 }

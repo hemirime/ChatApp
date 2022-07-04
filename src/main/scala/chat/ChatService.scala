@@ -15,17 +15,22 @@ class ChatService(chatStorage: ChatStorage,
   def createChat(name: String, users: Seq[User.ID]): Future[Either[UserError, Chat]] = {
     Future.traverse(users) { id =>
       userStorage.get(id).map(id -> _)
-    } flatMap {
-      case foundUsers if foundUsers.flatMap(_._2).length == users.length =>
-        val chat = Chat(UUID.randomUUID(), name, users, OffsetDateTime.now())
-        chatStorage.save(chat)
-          .map(Right.apply)
-          .recover {
-            case _: Throwable => Left(ChatNameAlreadyTaken(name))
-          }
-      case list => Future.successful(Left(UsersNotFound(list.filter(_._2.isEmpty).map(_._1))))
+    } flatMap { result =>
+      result.flatMap(_._2) match {
+        case foundUsers if foundUsers.length == users.length =>
+          val chat = Chat(UUID.randomUUID(), name, foundUsers, OffsetDateTime.now())
+          chatStorage.save(chat)
+            .map(Right.apply)
+            .recover {
+              case _: Throwable => Left(ChatNameAlreadyTaken(name))
+            }
+        case _ => Future.successful(Left(UsersNotFound(result.filter(_._2.isEmpty).map(_._1))))
+      }
     }
   }
+
+  def getChat(chatId: Chat.ID): Future[Option[Chat]] =
+    chatStorage.get(chatId)
 
   def getChats(userId: User.ID): Future[Option[Seq[Chat]]] =
     ifExist(userStorage.get(userId)) { _ =>
