@@ -2,7 +2,7 @@ package com.github.hemirime.chatapp
 
 import chat.ChatService
 import chat.api.ChatApi
-import chat.storage.{DatabaseChatStorage, InMemoryMessageStorage}
+import chat.storage.{DatabaseChatStorage, DatabaseMessageStorage}
 import user.UserService
 import user.api.UserApi
 import user.storage.DatabaseUserStorage
@@ -39,9 +39,10 @@ object ChatAppServer extends JsonErrorHandling {
 
     val userStorage = new DatabaseUserStorage(dal)
     val chatStorage = new DatabaseChatStorage(dal)
+    val messageStorage = new DatabaseMessageStorage(dal)
 
     val userApi = new UserApi(new UserService(userStorage)).routes
-    val chatApi = new ChatApi(new ChatService(chatStorage, new InMemoryMessageStorage, userStorage)).routes
+    val chatApi = new ChatApi(new ChatService(chatStorage, messageStorage, userStorage)).routes
 
     val routes = Route.seal(
       concat(
