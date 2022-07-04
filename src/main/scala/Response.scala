@@ -1,7 +1,7 @@
 package com.github.hemirime.chatapp
 
 import akka.http.scaladsl.model.StatusCode
-import akka.http.scaladsl.model.StatusCodes.{BadRequest, Conflict}
+import akka.http.scaladsl.model.StatusCodes.{BadRequest, Conflict, NotFound}
 import akka.http.scaladsl.server.Directives.{complete, rejectEmptyResponse}
 import akka.http.scaladsl.server.Route
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
@@ -28,6 +28,7 @@ object Response extends PlayJsonSupport {
   def completeWithEither[T](status: StatusCode, result: Either[UserError, T])(implicit w: Writes[T]): Route =
     result match {
       case Left(error) => error match {
+        case ChatNotFound(id) => complete(NotFound, err(s"chat with id '$id' could not be found"))
         case ChatNameAlreadyTaken(name) => complete(Conflict, err(s"chat with name '$name' already created"))
         case UsersNotFound(userIds) => complete(BadRequest, err(s"users with ids: '${userIds.mkString(", ")}' not found"))
         case UsernameAlreadyTaken(name) => complete(Conflict, err(s"username '$name' already taken"))

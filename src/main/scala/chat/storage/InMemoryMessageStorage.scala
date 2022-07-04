@@ -11,7 +11,7 @@ class InMemoryMessageStorage extends MessageStorage {
 
   override def add(message: Message): Future[Message] =
     Future.successful {
-      messages = messages + (message.chat -> (message +: messages(message.chat)))
+      messages = messages + (message.chat.id -> (message +: messages(message.chat.id)))
       message
     }
 

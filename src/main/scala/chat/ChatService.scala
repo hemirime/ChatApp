@@ -46,10 +46,15 @@ class ChatService(chatStorage: ChatStorage,
     }
   }
 
-  def sendMessage(chatId: Chat.ID, author: User.ID, text: String): Future[Option[Message]] =
-    ifExist(chatStorage.get(chatId)) { _ =>
-      val message = Message(UUID.randomUUID(), chatId, author, text, OffsetDateTime.now())
-      messageStorage.add(message)
+  def sendMessage(chatId: Chat.ID, author: User.ID, text: String): Future[Either[UserError, Message]] =
+    chatStorage.get(chatId) flatMap {
+      case Some(chat) => userStorage.get(author) flatMap {
+        case Some(user) =>
+          val message = Message(UUID.randomUUID(), chat, user, text, OffsetDateTime.now())
+          messageStorage.add(message).map(Right.apply)
+        case _ => Future.successful(Left(UsersNotFound(Seq(author))))
+      }
+      case _ => Future.successful(Left(ChatNotFound(chatId)))
     }
 
   private def ifExist[T, S](t: Future[Option[T]])(f: T => Future[S]): Future[Option[S]] =

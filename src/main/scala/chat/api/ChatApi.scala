@@ -56,7 +56,7 @@ class ChatApi(chatService: ChatService)
 
   def sendMessage(chatId: Chat.ID): Route = post {
     entity(as[SendMessageRequest]) { request =>
-      onSuccess(chatService.sendMessage(chatId, request.author, request.text))(completeWithOption(OK, _))
+      onSuccess(chatService.sendMessage(chatId, request.author, request.text))(completeWithEither(OK, _))
     }
   }
 }

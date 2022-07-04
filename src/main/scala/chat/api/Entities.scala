@@ -33,5 +33,10 @@ private[api] trait EntityMarshalling extends PlayJsonSupport {
       (__ \ "users").write[Seq[UUID]] and
       (__ \ "createdAt").write[OffsetDateTime]
     ) (unlift(Chat.unapply).andThen { case (i, n, u, c) => (i, n, u.map(_.id), c) })
-  implicit val messageWrites: OWrites[Message] = Json.writes[Message]
+  implicit val messageWrites: OWrites[Message] = (
+    (__ \ "id").write[UUID] and
+      (__ \ "author").write[UUID] and
+      (__ \ "text").write[String] and
+      (__ \ "createdAt").write[OffsetDateTime]
+    ) (unlift(Message.unapply).andThen { case (i, c, u, t, a) => (i, u.id, t, a) })
 }
