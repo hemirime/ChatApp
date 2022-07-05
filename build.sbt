@@ -1,3 +1,5 @@
+enablePlugins(JavaAppPackaging, AshScriptPlugin)
+
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "2.13.8"
@@ -9,6 +11,8 @@ lazy val root = (project in file("."))
   )
 
 scalacOptions += "-Wconf:cat=other-match-analysis:error"
+
+dockerBaseImage := "openjdk:8-jre-alpine"
 
 libraryDependencies ++= {
   val AkkaVersion = "2.6.19"
